@@ -1,0 +1,3592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Bird File Manager</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    background:#101010;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    overflow:hidden;
+}
+
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+}
+
+button{
+    border:1px solid #444;
+    border-radius:9px;
+    background:#222;
+    color:#fff;
+    cursor:pointer;
+}
+
+button:active{
+    background:#333;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    border:1px solid #444;
+    border-radius:9px;
+    background:#1d1d1d;
+    color:#fff;
+    outline:none;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    border-color:#777;
+}
+
+/* AUTH */
+
+#authScreen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:#101010;
+}
+
+.authBox{
+    width:100%;
+    max-width:400px;
+    padding:24px;
+    border:1px solid #3d3d3d;
+    border-radius:18px;
+    background:#181818;
+    box-shadow:0 20px 60px #000;
+}
+
+.authLogo{
+    text-align:center;
+    font-size:27px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.authSub{
+    text-align:center;
+    color:#888;
+    font-size:12px;
+    margin-bottom:20px;
+}
+
+.authTabs{
+    display:flex;
+    gap:7px;
+    margin-bottom:12px;
+}
+
+.authTabs button{
+    flex:1;
+    height:42px;
+}
+
+.authTabs .active{
+    background:#eee;
+    color:#111;
+}
+
+.authInput{
+    height:44px;
+    padding:0 12px;
+    margin:5px 0;
+}
+
+.authSubmit{
+    width:100%;
+    height:44px;
+    margin-top:9px;
+    border:0;
+    background:#eee;
+    color:#111;
+    font-weight:bold;
+}
+
+.authMsg{
+    min-height:18px;
+    margin-top:10px;
+    text-align:center;
+    color:#aaa;
+    font-size:12px;
+}
+
+/* APP */
+
+#app{
+    display:none;
+    flex-direction:column;
+    width:100%;
+    height:100dvh;
+    max-width:1000px;
+    margin:auto;
+    background:#111;
+}
+
+/* HEADER */
+
+.header{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    height:58px;
+    flex-shrink:0;
+    padding:9px;
+    border-bottom:1px solid #333;
+    background:#161616;
+}
+
+.logo{
+    flex:1;
+    min-width:0;
+    font-size:18px;
+    font-weight:bold;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.headerBtn{
+    width:38px;
+    height:38px;
+    padding:0;
+}
+
+/* TOOLBAR */
+
+.toolbar{
+    display:flex;
+    gap:7px;
+    padding:8px;
+    border-bottom:1px solid #333;
+    overflow-x:auto;
+    scrollbar-width:none;
+}
+
+.toolbar::-webkit-scrollbar{
+    display:none;
+}
+
+.toolBtn{
+    flex-shrink:0;
+    height:38px;
+    padding:0 12px;
+}
+
+/* SEARCH */
+
+#searchBar{
+    display:none;
+    padding:8px;
+    border-bottom:1px solid #333;
+}
+
+#searchInput{
+    height:40px;
+    padding:0 12px;
+}
+
+/* PATH */
+
+.pathBar{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:8px;
+    border-bottom:1px solid #333;
+    background:#181818;
+}
+
+#backBtn{
+    width:38px;
+    height:34px;
+}
+
+#pathText{
+    flex:1;
+    min-width:0;
+    color:#aaa;
+    font-size:13px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+/* FILE LIST */
+
+#fileList{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:8px;
+}
+
+.fileItem{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:62px;
+    margin-bottom:6px;
+    padding:9px;
+    border:1px solid #333;
+    border-radius:11px;
+    background:#191919;
+}
+
+.fileItem:active{
+    background:#292929;
+}
+
+.fileIcon{
+    width:38px;
+    text-align:center;
+    font-size:23px;
+}
+
+.fileInfo{
+    flex:1;
+    min-width:0;
+}
+
+.fileName{
+    font-size:14px;
+    font-weight:bold;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.fileMeta{
+    margin-top:4px;
+    color:#777;
+    font-size:11px;
+}
+
+.fileMenu{
+    width:36px;
+    height:35px;
+    padding:0;
+    flex-shrink:0;
+}
+
+.empty{
+    padding:55px 15px;
+    text-align:center;
+    color:#777;
+}
+
+.emptyIcon{
+    font-size:45px;
+    margin-bottom:10px;
+}
+
+/* OVERLAY */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    background:rgba(0,0,0,.78);
+}
+
+.panel{
+    width:100%;
+    max-width:500px;
+    max-height:90dvh;
+    overflow-y:auto;
+    padding:18px;
+    border:1px solid #444;
+    border-radius:16px;
+    background:#181818;
+}
+
+.panel h2{
+    margin:0 0 15px;
+    font-size:19px;
+}
+
+.panel input,
+.panel textarea,
+.panel select{
+    padding:11px;
+    margin:5px 0;
+}
+
+.panel textarea{
+    min-height:180px;
+    resize:vertical;
+}
+
+.row{
+    display:flex;
+    gap:7px;
+    margin-top:10px;
+}
+
+.row button{
+    flex:1;
+    min-height:40px;
+}
+
+.primary{
+    background:#eee;
+    color:#111;
+    border-color:#eee;
+}
+
+/* CONTEXT */
+
+.contextButtons{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.contextButtons button{
+    width:100%;
+    min-height:42px;
+    padding:0 13px;
+    text-align:left;
+}
+
+.danger{
+    color:#ff6b6b;
+}
+
+/* ACCOUNT */
+
+.accountInfo{
+    padding:12px;
+    margin-bottom:10px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#202020;
+}
+
+.accountLine{
+    margin:7px 0;
+    color:#aaa;
+    font-size:13px;
+    word-break:break-all;
+}
+
+.accountLine b{
+    color:#fff;
+}
+
+/* EDITOR */
+
+#editorScreen{
+    position:fixed;
+    inset:0;
+    z-index:3000;
+    display:none;
+    flex-direction:column;
+    background:#0d0d0d;
+}
+
+.editorHeader{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    height:55px;
+    padding:8px;
+    border-bottom:1px solid #333;
+    background:#171717;
+}
+
+#editorTitle{
+    flex:1;
+    min-width:0;
+    font-size:14px;
+    font-weight:bold;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.editorBtn{
+    width:38px;
+    height:36px;
+    flex-shrink:0;
+}
+
+#editor{
+    flex:1;
+    width:100%;
+    min-height:0;
+    padding:15px;
+    resize:none;
+    border:0;
+    border-radius:0;
+    outline:none;
+    background:#0d0d0d;
+    color:#eee;
+    font-family:monospace;
+    font-size:14px;
+    line-height:1.5;
+}
+
+/* PREVIEW */
+
+#previewScreen{
+    position:fixed;
+    inset:0;
+    z-index:4000;
+    display:none;
+    flex-direction:column;
+    background:#fff;
+}
+
+.previewHeader{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    height:52px;
+    padding:8px;
+    background:#181818;
+}
+
+#previewTitle{
+    flex:1;
+    color:#fff;
+    font-size:14px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.previewClose{
+    width:40px;
+    height:36px;
+}
+
+#previewFrame{
+    flex:1;
+    width:100%;
+    border:0;
+    background:#fff;
+}
+
+/* MORE */
+
+.moreButtons{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.moreButtons button{
+    min-height:42px;
+    padding:0 13px;
+    text-align:left;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+    .toolbar{
+        padding:7px;
+    }
+
+    .toolBtn{
+        padding:0 10px;
+    }
+
+    .panel{
+        max-height:94dvh;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN / SIGN UP -->
+
+<div id="authScreen">
+
+    <div class="authBox">
+
+        <div class="authLogo">
+            🐦 Bird File Manager
+        </div>
+
+        <div class="authSub">
+            Local File Manager
+        </div>
+
+        <div class="authTabs">
+
+            <button
+                id="loginTab"
+                class="active"
+                onclick="showAuth('login')">
+                Login
+            </button>
+
+            <button
+                id="signupTab"
+                onclick="showAuth('signup')">
+                Sign Up
+            </button>
+
+        </div>
+
+        <input
+            id="username"
+            class="authInput"
+            placeholder="Username"
+            autocomplete="username">
+
+        <input
+            id="password"
+            class="authInput"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password">
+
+        <input
+            id="confirmPassword"
+            class="authInput"
+            type="password"
+            placeholder="Confirm password"
+            autocomplete="new-password"
+            style="display:none">
+
+        <button
+            id="authButton"
+            class="authSubmit"
+            onclick="authAction()">
+            Login
+        </button>
+
+        <div
+            id="authMsg"
+            class="authMsg">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MAIN APP -->
+
+<div id="app">
+
+    <div class="header">
+
+        <div class="logo">
+            🐦 Bird File Manager
+        </div>
+
+        <button
+            class="headerBtn"
+            onclick="toggleSearch()">
+            🔎
+        </button>
+
+        <button
+            class="headerBtn"
+            onclick="openAccount()">
+            👤
+        </button>
+
+        <button
+            class="headerBtn"
+            onclick="openMore()">
+            ⋮
+        </button>
+
+    </div>
+
+
+    <div class="toolbar">
+
+        <button
+            class="toolBtn"
+            onclick="openCreateFile()">
+            + File
+        </button>
+
+        <button
+            class="toolBtn"
+            onclick="openCreateFolder()">
+            + Folder
+        </button>
+
+        <button
+            class="toolBtn"
+            onclick="importFiles()">
+            Import
+        </button>
+
+        <button
+            class="toolBtn"
+            onclick="sortFiles()">
+            Sort
+        </button>
+
+        <button
+            class="toolBtn"
+            onclick="refreshFiles()">
+            Refresh
+        </button>
+
+    </div>
+
+
+    <div id="searchBar">
+
+        <input
+            id="searchInput"
+            placeholder="Search files and folders..."
+            oninput="renderFiles()">
+
+    </div>
+
+
+    <div class="pathBar">
+
+        <button
+            id="backBtn"
+            onclick="goBack()">
+            ←
+        </button>
+
+        <div id="pathText">
+            / Home
+        </div>
+
+    </div>
+
+
+    <div id="fileList"></div>
+
+</div>
+
+
+<!-- CREATE FILE -->
+
+<div
+    id="createFileOverlay"
+    class="overlay">
+
+    <div class="panel">
+
+        <h2>Create File</h2>
+
+        <input
+            id="createName"
+            placeholder="File name">
+
+        <select id="createType">
+
+            <option value="txt">TXT</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="js">JavaScript</option>
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+            <option value="md">Markdown</option>
+            <option value="py">Python</option>
+            <option value="lua">Lua</option>
+            <option value="luau">Luau</option>
+
+        </select>
+
+        <textarea
+            id="createContent"
+            placeholder="File content..."></textarea>
+
+        <div class="row">
+
+            <button
+                class="primary"
+                onclick="createFile()">
+                Create
+            </button>
+
+            <button
+                onclick="closeOverlays()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CREATE FOLDER -->
+
+<div
+    id="createFolderOverlay"
+    class="overlay">
+
+    <div class="panel">
+
+        <h2>Create Folder</h2>
+
+        <input
+            id="folderName"
+            placeholder="Folder name">
+
+        <div class="row">
+
+            <button
+                class="primary"
+                onclick="createFolder()">
+                Create
+            </button>
+
+            <button
+                onclick="closeOverlays()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CONTEXT MENU -->
+
+<div
+    id="contextOverlay"
+    class="overlay">
+
+    <div class="panel">
+
+        <h2 id="contextTitle">
+            Item
+        </h2>
+
+        <div class="contextButtons">
+
+            <button
+                id="contextOpen"
+                onclick="contextOpen()">
+                📂 Open
+            </button>
+
+            <button
+                onclick="contextRename()">
+                ✏️ Rename
+            </button>
+
+            <button
+                id="contextExport"
+                onclick="contextExport()">
+                📤 Export
+            </button>
+
+            <button
+                class="danger"
+                onclick="contextDelete()">
+                🗑️ Delete
+            </button>
+
+            <button
+                onclick="closeOverlays()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ACCOUNT -->
+
+<div
+    id="accountOverlay"
+    class="overlay">
+
+    <div class="panel">
+
+        <h2>Account</h2>
+
+        <div class="accountInfo">
+
+            <div class="accountLine">
+                Username:
+                <b id="accountUsername">-</b>
+            </div>
+
+            <div class="accountLine">
+                User ID:
+                <b id="accountId">-</b>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <button
+                onclick="closeOverlays()">
+                Close
+            </button>
+
+            <button
+                class="danger"
+                onclick="logout()">
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MORE -->
+
+<div
+    id="moreOverlay"
+    class="overlay">
+
+    <div class="panel">
+
+        <h2>More</h2>
+
+        <div class="moreButtons">
+
+            <button
+                onclick="toggleSearch();closeOverlays()">
+                🔎 Search
+            </button>
+
+            <button
+                onclick="sortFiles();closeOverlays()">
+                ↕ Sort
+            </button>
+
+            <button
+                onclick="refreshFiles();closeOverlays()">
+                🔄 Refresh
+            </button>
+
+            <button
+                onclick="clearAllFiles()">
+                🗑️ Clear Current Folder
+            </button>
+
+            <button
+                onclick="closeOverlays();openAccount()">
+                👤 Account
+            </button>
+
+            <button
+                onclick="closeOverlays()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- EDITOR -->
+
+<div id="editorScreen">
+
+    <div class="editorHeader">
+
+        <button
+            class="editorBtn"
+            onclick="closeEditor()">
+            ←
+        </button>
+
+        <div id="editorTitle">
+            Editor
+        </div>
+
+        <button
+            class="editorBtn"
+            onclick="saveEditor()">
+            💾
+        </button>
+
+        <button
+            class="editorBtn"
+            onclick="previewEditor()">
+            ▶
+        </button>
+
+        <button
+            class="editorBtn"
+            onclick="exportCurrentFile()">
+            📤
+        </button>
+
+    </div>
+
+    <textarea id="editor"></textarea>
+
+</div>
+
+
+<!-- PREVIEW -->
+
+<div id="previewScreen">
+
+    <div class="previewHeader">
+
+        <div id="previewTitle">
+            Preview
+        </div>
+
+        <button
+            class="previewClose"
+            onclick="closePreview()">
+            ✕
+        </button>
+
+    </div>
+
+    <iframe
+        id="previewFrame"
+        sandbox="allow-forms">
+    </iframe>
+
+</div>
+
+
+<input
+    id="fileInput"
+    type="file"
+    multiple
+    hidden>
+
+<!-- PHẦN 2: JAVASCRIPT -->
+<script>
+/* =========================
+   BIRD FILE MANAGER
+   JAVASCRIPT
+========================= */
+
+const USERS_KEY = "bird_file_manager_users_v1";
+const SESSION_KEY = "bird_file_manager_session_v1";
+const DATA_PREFIX = "bird_file_manager_data_";
+
+let currentUser = null;
+let currentPath = "";
+let selectedItem = null;
+let editorFileId = null;
+let sortMode = "name";
+let authMode = "login";
+
+
+/* =========================
+   DOM
+========================= */
+
+const authScreen = document.getElementById("authScreen");
+const app = document.getElementById("app");
+
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput =
+    document.getElementById("confirmPassword");
+
+const authButton = document.getElementById("authButton");
+const authMsg = document.getElementById("authMsg");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const pathText =
+    document.getElementById("pathText");
+
+const fileList =
+    document.getElementById("fileList");
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const editorScreen =
+    document.getElementById("editorScreen");
+
+const editorTitle =
+    document.getElementById("editorTitle");
+
+const editor =
+    document.getElementById("editor");
+
+const previewScreen =
+    document.getElementById("previewScreen");
+
+const previewTitle =
+    document.getElementById("previewTitle");
+
+const previewFrame =
+    document.getElementById("previewFrame");
+
+
+/* =========================
+   INIT
+========================= */
+
+window.addEventListener("load",function(){
+
+    const session =
+        localStorage.getItem(SESSION_KEY);
+
+    if(session){
+
+        const users = getUsers();
+
+        const user =
+            users.find(u => u.id === session);
+
+        if(user){
+
+            enterApp(user);
+
+            return;
+        }
+    }
+
+    showAuth("login");
+});
+
+
+/* =========================
+   AUTH
+========================= */
+
+function getUsers(){
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem(USERS_KEY)
+        ) || [];
+
+    }catch(e){
+
+        return [];
+    }
+}
+
+
+function saveUsers(users){
+
+    localStorage.setItem(
+        USERS_KEY,
+        JSON.stringify(users)
+    );
+}
+
+
+function showAuth(mode){
+
+    authMode = mode;
+
+    document.getElementById("loginTab")
+        .classList.toggle(
+            "active",
+            mode === "login"
+        );
+
+    document.getElementById("signupTab")
+        .classList.toggle(
+            "active",
+            mode === "signup"
+        );
+
+    confirmPasswordInput.style.display =
+        mode === "signup"
+            ? "block"
+            : "none";
+
+    authButton.textContent =
+        mode === "signup"
+            ? "Create Account"
+            : "Login";
+
+    authMsg.textContent = "";
+
+    passwordInput.value = "";
+    confirmPasswordInput.value = "";
+}
+
+
+function authAction(){
+
+    const username =
+        usernameInput.value.trim();
+
+    const password =
+        passwordInput.value;
+
+    if(!username){
+
+        authMsg.style.color = "#ff7777";
+
+        authMsg.textContent =
+            "Enter a username.";
+
+        return;
+    }
+
+    if(authMode === "signup"){
+
+        const confirm =
+            confirmPasswordInput.value;
+
+        if(username.length < 3){
+
+            authMsg.style.color =
+                "#ff7777";
+
+            authMsg.textContent =
+                "Username must have at least 3 characters.";
+
+            return;
+        }
+
+        if(password.length < 4){
+
+            authMsg.style.color =
+                "#ff7777";
+
+            authMsg.textContent =
+                "Password must have at least 4 characters.";
+
+            return;
+        }
+
+        if(password !== confirm){
+
+            authMsg.style.color =
+                "#ff7777";
+
+            authMsg.textContent =
+                "Passwords do not match.";
+
+            return;
+        }
+
+        const users = getUsers();
+
+        const exists =
+            users.some(
+                u =>
+                    u.username.toLowerCase() ===
+                    username.toLowerCase()
+            );
+
+        if(exists){
+
+            authMsg.style.color =
+                "#ff7777";
+
+            authMsg.textContent =
+                "Username already exists.";
+
+            return;
+        }
+
+        const user = {
+
+            id:
+                "bird_" +
+                Date.now() +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .slice(2,8),
+
+            username:username,
+
+            password:password
+        };
+
+        users.push(user);
+
+        saveUsers(users);
+
+        createUserStorage(user.id);
+
+        localStorage.setItem(
+            SESSION_KEY,
+            user.id
+        );
+
+        enterApp(user);
+
+        return;
+    }
+
+
+    const users = getUsers();
+
+    const user =
+        users.find(
+            u =>
+                u.username.toLowerCase() ===
+                username.toLowerCase() &&
+                u.password === password
+        );
+
+
+    if(!user){
+
+        authMsg.style.color =
+            "#ff7777";
+
+        authMsg.textContent =
+            "Invalid username or password.";
+
+        return;
+    }
+
+
+    localStorage.setItem(
+        SESSION_KEY,
+        user.id
+    );
+
+    enterApp(user);
+}
+
+
+function enterApp(user){
+
+    currentUser = user;
+
+    currentPath = "";
+
+    selectedItem = null;
+
+    editorFileId = null;
+
+    createUserStorage(user.id);
+
+    authScreen.style.display = "none";
+
+    app.style.display = "flex";
+
+    document.getElementById(
+        "accountUsername"
+    ).textContent = user.username;
+
+    document.getElementById(
+        "accountId"
+    ).textContent = user.id;
+
+    searchInput.value = "";
+
+    renderFiles();
+}
+
+
+function logout(){
+
+    localStorage.removeItem(
+        SESSION_KEY
+    );
+
+    currentUser = null;
+
+    currentPath = "";
+
+    selectedItem = null;
+
+    editorFileId = null;
+
+    closeOverlays();
+
+    closeEditor();
+
+    closePreview();
+
+    app.style.display = "none";
+
+    authScreen.style.display = "flex";
+
+    usernameInput.value = "";
+
+    passwordInput.value = "";
+
+    confirmPasswordInput.value = "";
+
+    showAuth("login");
+}
+
+
+/* =========================
+   USER STORAGE
+========================= */
+
+function storageKey(){
+
+    return DATA_PREFIX +
+        currentUser.id;
+}
+
+
+function createUserStorage(userId){
+
+    const key =
+        DATA_PREFIX + userId;
+
+    if(!localStorage.getItem(key)){
+
+        const data = {
+
+            files:[],
+
+            folders:[]
+        };
+
+        localStorage.setItem(
+            key,
+            JSON.stringify(data)
+        );
+    }
+}
+
+
+function getData(){
+
+    if(!currentUser){
+
+        return {
+            files:[],
+            folders:[]
+        };
+    }
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem(
+                storageKey()
+            )
+        ) || {
+            files:[],
+            folders:[]
+        };
+
+    }catch(e){
+
+        return {
+            files:[],
+            folders:[]
+        };
+    }
+}
+
+
+function saveData(data){
+
+    localStorage.setItem(
+        storageKey(),
+        JSON.stringify(data)
+    );
+}
+
+
+/* =========================
+   PATH
+========================= */
+
+function currentPathString(){
+
+    return currentPath;
+}
+
+
+function pathTextValue(){
+
+    if(!currentPath){
+
+        return "/ Home";
+    }
+
+    return "/ Home / " +
+        currentPath
+            .split("/")
+            .join(" / ");
+}
+
+
+function getParentPath(path){
+
+    if(!path){
+
+        return "";
+    }
+
+    const parts =
+        path.split("/");
+
+    parts.pop();
+
+    return parts.join("/");
+}
+
+
+function isDirectChild(path){
+
+    return path === currentPath;
+}
+
+
+function goBack(){
+
+    if(!currentPath){
+
+        return;
+    }
+
+    currentPath =
+        getParentPath(currentPath);
+
+    renderFiles();
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function makeId(){
+
+    return (
+        Date.now() +
+        "_" +
+        Math.random()
+            .toString(36)
+            .slice(2,10)
+    );
+}
+
+
+function getExtension(name){
+
+    const dot =
+        name.lastIndexOf(".");
+
+    if(dot === -1){
+
+        return "";
+    }
+
+    return name
+        .slice(dot + 1)
+        .toLowerCase();
+}
+
+
+function iconFor(item){
+
+    if(item.type === "folder"){
+
+        return "📁";
+    }
+
+    const ext =
+        getExtension(item.name);
+
+    const icons = {
+
+        html:"🌐",
+        htm:"🌐",
+
+        css:"🎨",
+
+        js:"📜",
+
+        json:"🔧",
+
+        xml:"🧩",
+
+        txt:"📄",
+
+        md:"📝",
+
+        py:"🐍",
+
+        lua:"🌙",
+
+        luau:"🌙",
+
+        java:"☕",
+
+        cpp:"⚙️",
+
+        c:"⚙️",
+
+        h:"⚙️",
+
+        png:"🖼️",
+        jpg:"🖼️",
+        jpeg:"🖼️",
+        webp:"🖼️",
+        gif:"🖼️",
+        svg:"🖼️",
+
+        mp3:"🎵",
+        wav:"🎵",
+
+        mp4:"🎬",
+        webm:"🎬",
+
+        pdf:"📕",
+
+        zip:"📦",
+
+        apk:"📦"
+    };
+
+    return icons[ext] || "📄";
+}
+
+
+function formatSize(size){
+
+    size = Number(size) || 0;
+
+    if(size < 1024){
+
+        return size + " B";
+    }
+
+    if(size < 1024 * 1024){
+
+        return (
+            (size / 1024)
+                .toFixed(1)
+        ) + " KB";
+    }
+
+    if(size < 1024 * 1024 * 1024){
+
+        return (
+            (size /
+                (1024 * 1024))
+                .toFixed(1)
+        ) + " MB";
+    }
+
+    return (
+        (size /
+            (1024 * 1024 * 1024))
+            .toFixed(1)
+    ) + " GB";
+}
+
+
+function formatDate(time){
+
+    if(!time){
+
+        return "";
+    }
+
+    try{
+
+        return new Date(time)
+            .toLocaleString();
+
+    }catch(e){
+
+        return "";
+    }
+}
+
+
+function escapeHtml(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderFiles(){
+
+    if(!currentUser){
+
+        return;
+    }
+
+    const data = getData();
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    pathText.textContent =
+        pathTextValue();
+
+    let folders =
+        data.folders.filter(
+            folder =>
+                folder.path === currentPath
+        );
+
+    let files =
+        data.files.filter(
+            file =>
+                file.path === currentPath
+        );
+
+
+    if(search){
+
+        folders =
+            folders.filter(
+                folder =>
+                    folder.name
+                        .toLowerCase()
+                        .includes(search)
+            );
+
+        files =
+            files.filter(
+                file =>
+                    file.name
+                        .toLowerCase()
+                        .includes(search)
+            );
+    }
+
+
+    const items = [];
+
+
+    folders.forEach(folder => {
+
+        items.push({
+
+            type:"folder",
+
+            id:folder.id,
+
+            name:folder.name,
+
+            path:folder.path,
+
+            created:folder.created
+        });
+
+    });
+
+
+    files.forEach(file => {
+
+        items.push({
+
+            type:"file",
+
+            id:file.id,
+
+            name:file.name,
+
+            path:file.path,
+
+            size:file.size,
+
+            updated:file.updated,
+
+            created:file.created
+        });
+
+    });
+
+
+    if(sortMode === "name"){
+
+        items.sort(
+            (a,b) =>
+                a.name.localeCompare(
+                    b.name
+                )
+        );
+    }
+
+
+    if(sortMode === "date"){
+
+        items.sort(
+            (a,b) =>
+                (b.updated || b.created || 0) -
+                (a.updated || a.created || 0)
+        );
+    }
+
+
+    if(sortMode === "size"){
+
+        items.sort(
+            (a,b) =>
+                (b.size || 0) -
+                (a.size || 0)
+        );
+    }
+
+
+    if(!items.length){
+
+        fileList.innerHTML = `
+            <div class="empty">
+                <div class="emptyIcon">📂</div>
+                <div>No files or folders</div>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    fileList.innerHTML = "";
+
+
+    items.forEach(item => {
+
+        const el =
+            document.createElement("div");
+
+        el.className =
+            "fileItem";
+
+        const meta =
+            item.type === "folder"
+
+                ? "Folder"
+
+                : formatSize(item.size) +
+                  " • " +
+                  formatDate(item.updated);
+
+
+        el.innerHTML = `
+
+            <div class="fileIcon">
+                ${iconFor(item)}
+            </div>
+
+            <div class="fileInfo">
+
+                <div class="fileName">
+                    ${escapeHtml(item.name)}
+                </div>
+
+                <div class="fileMeta">
+                    ${escapeHtml(meta)}
+                </div>
+
+            </div>
+
+            <button
+                class="fileMenu"
+                onclick="event.stopPropagation();openContext('${item.type}','${item.id}')">
+                ⋮
+            </button>
+        `;
+
+
+        el.onclick = function(){
+
+            openItem(
+                item.type,
+                item.id
+            );
+        };
+
+
+        el.ondblclick = function(){
+
+            openItem(
+                item.type,
+                item.id
+            );
+        };
+
+
+        fileList.appendChild(el);
+    });
+}
+
+
+/* =========================
+   OPEN ITEMS
+========================= */
+
+function openItem(type,id){
+
+    const data = getData();
+
+    if(type === "folder"){
+
+        const folder =
+            data.folders.find(
+                f => f.id === id
+            );
+
+        if(!folder){
+
+            return;
+        }
+
+        currentPath =
+            folder.path
+                ? folder.path + "/" + folder.name
+                : folder.name;
+
+        renderFiles();
+
+        return;
+    }
+
+
+    const file =
+        data.files.find(
+            f => f.id === id
+        );
+
+    if(!file){
+
+        return;
+    }
+
+    openFile(file);
+}
+
+
+function openFile(file){
+
+    const ext =
+        getExtension(file.name);
+
+
+    if([
+        "html",
+        "htm",
+        "css",
+        "js",
+        "json",
+        "xml",
+        "txt",
+        "md",
+        "py",
+        "lua",
+        "luau",
+        "java",
+        "cpp",
+        "c",
+        "h"
+    ].includes(ext)){
+
+        openEditor(file);
+
+        return;
+    }
+
+
+    if([
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "gif",
+        "svg"
+    ].includes(ext)){
+
+        previewImage(file);
+
+        return;
+    }
+
+
+    if([
+        "pdf"
+    ].includes(ext)){
+
+        previewFileUrl(file);
+
+        return;
+    }
+
+
+    alert(
+        "This file type cannot be opened in the editor."
+    );
+}
+
+
+/* =========================
+   CREATE FILE
+========================= */
+
+function openCreateFile(){
+
+    closeOverlays();
+
+    document.getElementById(
+        "createName"
+    ).value = "";
+
+    document.getElementById(
+        "createContent"
+    ).value = "";
+
+    document.getElementById(
+        "createFileOverlay"
+    ).style.display = "flex";
+}
+
+
+function createFile(){
+
+    const name =
+        document.getElementById(
+            "createName"
+        ).value.trim();
+
+    const type =
+        document.getElementById(
+            "createType"
+        ).value;
+
+    let content =
+        document.getElementById(
+            "createContent"
+        ).value;
+
+
+    if(!name){
+
+        alert("Enter a file name.");
+
+        return;
+    }
+
+
+    let finalName = name;
+
+    if(!getExtension(finalName)){
+
+        finalName += "." + type;
+    }
+
+
+    const data = getData();
+
+    const duplicate =
+        data.files.some(
+            file =>
+                file.path === currentPath &&
+                file.name === finalName
+        );
+
+
+    if(duplicate){
+
+        alert("A file with this name already exists.");
+
+        return;
+    }
+
+
+    const now = Date.now();
+
+
+    const file = {
+
+        id:makeId(),
+
+        name:finalName,
+
+        path:currentPath,
+
+        content:content,
+
+        size:new Blob([content]).size,
+
+        created:now,
+
+        updated:now
+    };
+
+
+    data.files.push(file);
+
+    saveData(data);
+
+    closeOverlays();
+
+    renderFiles();
+}
+
+
+/* =========================
+   CREATE FOLDER
+========================= */
+
+function openCreateFolder(){
+
+    closeOverlays();
+
+    document.getElementById(
+        "folderName"
+    ).value = "";
+
+    document.getElementById(
+        "createFolderOverlay"
+    ).style.display = "flex";
+}
+
+
+function createFolder(){
+
+    const name =
+        document.getElementById(
+            "folderName"
+        ).value.trim();
+
+
+    if(!name){
+
+        alert("Enter a folder name.");
+
+        return;
+    }
+
+
+    if(name.includes("/")){
+
+        alert("Folder name cannot contain /.");
+
+        return;
+    }
+
+
+    const data = getData();
+
+
+    const duplicate =
+        data.folders.some(
+            folder =>
+                folder.path === currentPath &&
+                folder.name === name
+        );
+
+
+    if(duplicate){
+
+        alert(
+            "A folder with this name already exists."
+        );
+
+        return;
+    }
+
+
+    data.folders.push({
+
+        id:makeId(),
+
+        name:name,
+
+        path:currentPath,
+
+        created:Date.now()
+    });
+
+
+    saveData(data);
+
+    closeOverlays();
+
+    renderFiles();
+}
+
+
+/* =========================
+   CONTEXT
+========================= */
+
+function openContext(type,id){
+
+    const data = getData();
+
+    let item = null;
+
+    if(type === "folder"){
+
+        item =
+            data.folders.find(
+                f => f.id === id
+            );
+
+    }else{
+
+        item =
+            data.files.find(
+                f => f.id === id
+            );
+    }
+
+
+    if(!item){
+
+        return;
+    }
+
+
+    selectedItem = {
+
+        type:type,
+
+        id:id
+    };
+
+
+    document.getElementById(
+        "contextTitle"
+    ).textContent =
+        iconFor({
+            type:type,
+            name:item.name
+        }) +
+        " " +
+        item.name;
+
+
+    const openButton =
+        document.getElementById(
+            "contextOpen"
+        );
+
+
+    const exportButton =
+        document.getElementById(
+            "contextExport"
+        );
+
+
+    if(type === "folder"){
+
+        openButton.textContent =
+            "📂 Open";
+
+        exportButton.style.display =
+            "none";
+
+    }else{
+
+        openButton.textContent =
+            "✏️ Open";
+
+        exportButton.style.display =
+            "block";
+    }
+
+
+    document.getElementById(
+        "contextOverlay"
+    ).style.display = "flex";
+}
+
+
+function contextOpen(){
+
+    if(!selectedItem){
+
+        return;
+    }
+
+    const item =
+        selectedItem;
+
+    closeOverlays();
+
+    openItem(
+        item.type,
+        item.id
+    );
+}
+
+
+function contextExport(){
+
+    if(!selectedItem){
+
+        return;
+    }
+
+    if(selectedItem.type !== "file"){
+
+        return;
+    }
+
+    const data = getData();
+
+    const file =
+        data.files.find(
+            f => f.id === selectedItem.id
+        );
+
+    if(!file){
+
+        return;
+    }
+
+    exportFile(file);
+
+    closeOverlays();
+}
+
+
+function contextRename(){
+
+    if(!selectedItem){
+
+        return;
+    }
+
+    const data = getData();
+
+    if(selectedItem.type === "file"){
+
+        const file =
+            data.files.find(
+                f => f.id === selectedItem.id
+            );
+
+        if(!file){
+
+            return;
+        }
+
+        const newName =
+            prompt(
+                "New file name:",
+                file.name
+            );
+
+        if(newName === null){
+
+            return;
+        }
+
+        const name =
+            newName.trim();
+
+        if(!name){
+
+            return;
+        }
+
+        const duplicate =
+            data.files.some(
+                f =>
+                    f.id !== file.id &&
+                    f.path === file.path &&
+                    f.name === name
+            );
+
+        if(duplicate){
+
+            alert("Name already exists.");
+
+            return;
+        }
+
+        file.name = name;
+        file.updated = Date.now();
+
+        saveData(data);
+
+        closeOverlays();
+        renderFiles();
+
+        return;
+    }
+
+
+    const folder =
+        data.folders.find(
+            f => f.id === selectedItem.id
+        );
+
+    if(!folder){
+
+        return;
+    }
+
+
+    const newName =
+        prompt(
+            "New folder name:",
+            folder.name
+        );
+
+    if(newName === null){
+
+        return;
+    }
+
+    const name =
+        newName.trim();
+
+    if(!name){
+
+        return;
+    }
+
+    if(name.includes("/")){
+
+        alert(
+            "Folder name cannot contain /."
+        );
+
+        return;
+    }
+
+
+    const duplicate =
+        data.folders.some(
+            f =>
+                f.id !== folder.id &&
+                f.path === folder.path &&
+                f.name === name
+        );
+
+    if(duplicate){
+
+        alert("Name already exists.");
+
+        return;
+    }
+
+
+    const oldFull =
+        folder.path
+            ? folder.path + "/" + folder.name
+            : folder.name;
+
+    const newFull =
+        folder.path
+            ? folder.path + "/" + name
+            : name;
+
+
+    folder.name = name;
+
+
+    data.folders.forEach(f => {
+
+        if(
+            f.path === oldFull ||
+            f.path.startsWith(oldFull + "/")
+        ){
+
+            f.path =
+                newFull +
+                f.path.slice(oldFull.length);
+        }
+
+    });
+
+
+    data.files.forEach(f => {
+
+        if(
+            f.path === oldFull ||
+            f.path.startsWith(oldFull + "/")
+        ){
+
+            f.path =
+                newFull +
+                f.path.slice(oldFull.length);
+        }
+
+    });
+
+
+    if(
+        currentPath === oldFull ||
+        currentPath.startsWith(oldFull + "/")
+    ){
+
+        currentPath =
+            newFull +
+            currentPath.slice(oldFull.length);
+    }
+
+
+    saveData(data);
+
+    closeOverlays();
+
+    renderFiles();
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+function contextDelete(){
+
+    if(!selectedItem){
+
+        return;
+    }
+
+
+    const data = getData();
+
+
+    if(selectedItem.type === "file"){
+
+        const file =
+            data.files.find(
+                f => f.id === selectedItem.id
+            );
+
+        if(!file){
+
+            return;
+        }
+
+
+        if(
+            !confirm(
+                "Delete " + file.name + "?"
+            )
+        ){
+
+            return;
+        }
+
+
+        data.files =
+            data.files.filter(
+                f => f.id !== file.id
+            );
+
+
+        saveData(data);
+
+        closeOverlays();
+
+        renderFiles();
+
+        return;
+    }
+
+
+    const folder =
+        data.folders.find(
+            f => f.id === selectedItem.id
+        );
+
+    if(!folder){
+
+        return;
+    }
+
+
+    if(
+        !confirm(
+            "Delete folder " +
+            folder.name +
+            " and everything inside it?"
+        )
+    ){
+
+        return;
+    }
+
+
+    const fullPath =
+        folder.path
+            ? folder.path + "/" + folder.name
+            : folder.name;
+
+
+    data.folders =
+        data.folders.filter(
+            f =>
+                f.id !== folder.id &&
+                f.path !== fullPath &&
+                !f.path.startsWith(
+                    fullPath + "/"
+                )
+        );
+
+
+    data.files =
+        data.files.filter(
+            f =>
+                f.path !== fullPath &&
+                !f.path.startsWith(
+                    fullPath + "/"
+                )
+        );
+
+
+    saveData(data);
+
+    closeOverlays();
+
+    renderFiles();
+}
+
+
+/* =========================
+   EDITOR
+========================= */
+
+function openEditor(file){
+
+    editorFileId = file.id;
+
+    editorTitle.textContent =
+        file.name;
+
+    editor.value =
+        file.content || "";
+
+    editorScreen.style.display =
+        "flex";
+}
+
+
+function closeEditor(){
+
+    editorScreen.style.display =
+        "none";
+
+    editorFileId = null;
+}
+
+
+function saveEditor(){
+
+    if(!editorFileId){
+
+        return;
+    }
+
+
+    const data = getData();
+
+    const file =
+        data.files.find(
+            f => f.id === editorFileId
+        );
+
+    if(!file){
+
+        return;
+    }
+
+
+    file.content =
+        editor.value;
+
+    file.size =
+        new Blob([
+            file.content
+        ]).size;
+
+    file.updated =
+        Date.now();
+
+
+    saveData(data);
+
+    renderFiles();
+
+
+    const oldTitle =
+        file.name;
+
+    editorTitle.textContent =
+        "Saved ✓";
+
+
+    setTimeout(
+        () => {
+
+            if(
+                editorScreen.style.display ===
+                "flex"
+            ){
+
+                editorTitle.textContent =
+                    oldTitle;
+            }
+
+        },
+        1000
+    );
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+function previewEditor(){
+
+    if(!editorFileId){
+
+        return;
+    }
+
+
+    const data = getData();
+
+    const file =
+        data.files.find(
+            f => f.id === editorFileId
+        );
+
+    if(!file){
+
+        return;
+    }
+
+
+    const ext =
+        getExtension(file.name);
+
+
+    if(
+        ext === "html" ||
+        ext === "htm" ||
+        ext === "svg"
+    ){
+
+        previewTitle.textContent =
+            file.name;
+
+        previewFrame.srcdoc =
+            file.content || "";
+
+        previewScreen.style.display =
+            "flex";
+
+        return;
+    }
+
+
+    if(
+        ext === "txt" ||
+        ext === "md" ||
+        ext === "json" ||
+        ext === "xml" ||
+        ext === "css" ||
+        ext === "js" ||
+        ext === "py" ||
+        ext === "lua" ||
+        ext === "luau" ||
+        ext === "java" ||
+        ext === "cpp" ||
+        ext === "c" ||
+        ext === "h"
+    ){
+
+        previewTitle.textContent =
+            file.name;
+
+        previewFrame.srcdoc = `
+            <!DOCTYPE html>
+            <html>
+            <body style="
+                margin:0;
+                padding:16px;
+                background:#111;
+                color:#eee;
+                font-family:monospace;
+                white-space:pre-wrap;
+                word-break:break-word;
+            ">
+            ${escapeHtml(file.content || "")}
+            </body>
+            </html>
+        `;
+
+        previewScreen.style.display =
+            "flex";
+
+        return;
+    }
+
+
+    alert(
+        "Preview is not available for this file type."
+    );
+}
+
+
+function previewImage(file){
+
+    if(!file.content){
+
+        alert("Image data is empty.");
+
+        return;
+    }
+
+
+    previewTitle.textContent =
+        file.name;
+
+
+    let src =
+        file.content;
+
+
+    if(!src.startsWith("data:")){
+
+        const ext =
+            getExtension(file.name);
+
+        let mime = "image/png";
+
+        if(
+            ext === "jpg" ||
+            ext === "jpeg"
+        ){
+
+            mime = "image/jpeg";
+
+        }else if(ext === "webp"){
+
+            mime = "image/webp";
+
+        }else if(ext === "gif"){
+
+            mime = "image/gif";
+
+        }else if(ext === "svg"){
+
+            mime = "image/svg+xml";
+        }
+
+
+        src =
+            "data:" +
+            mime +
+            ";base64," +
+            src;
+    }
+
+
+    previewFrame.srcdoc = `
+        <!DOCTYPE html>
+        <html>
+        <body style="
+            margin:0;
+            width:100vw;
+            height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#111;
+        ">
+        <img
+            src="${src}"
+            style="
+                max-width:100%;
+                max-height:100%;
+                object-fit:contain;
+            ">
+        </body>
+        </html>
+    `;
+
+
+    previewScreen.style.display =
+        "flex";
+}
+
+
+function previewFileUrl(file){
+
+    previewTitle.textContent =
+        file.name;
+
+
+    if(
+        file.content &&
+        file.content.startsWith("data:")
+    ){
+
+        previewFrame.src =
+            file.content;
+
+    }else{
+
+        previewFrame.srcdoc = `
+            <pre style="
+                padding:15px;
+                white-space:pre-wrap;
+            ">${escapeHtml(
+                file.content || ""
+            )}</pre>
+        `;
+    }
+
+
+    previewScreen.style.display =
+        "flex";
+}
+
+
+function closePreview(){
+
+    previewScreen.style.display =
+        "none";
+
+    previewFrame.src =
+        "about:blank";
+
+    previewFrame.srcdoc = "";
+}
+
+
+/* =========================
+   EXPORT
+========================= */
+
+function exportFile(file){
+
+    let blob;
+
+
+    if(
+        file.content &&
+        file.content.startsWith("data:")
+    ){
+
+        const parts =
+            file.content.split(",");
+
+        const header =
+            parts[0];
+
+        const base64 =
+            parts.slice(1).join(",");
+
+
+        try{
+
+            const mimeMatch =
+                header.match(
+                    /data:([^;]+)/
+                );
+
+            const mime =
+                mimeMatch
+                    ? mimeMatch[1]
+                    : "application/octet-stream";
+
+
+            const binary =
+                atob(base64);
+
+            const bytes =
+                new Uint8Array(
+                    binary.length
+                );
+
+
+            for(
+                let i = 0;
+                i < binary.length;
+                i++
+            ){
+
+                bytes[i] =
+                    binary.charCodeAt(i);
+            }
+
+
+            blob =
+                new Blob(
+                    [bytes],
+                    {type:mime}
+                );
+
+        }catch(error){
+
+            blob =
+                new Blob(
+                    [file.content],
+                    {type:"text/plain"}
+                );
+        }
+
+    }else{
+
+        blob =
+            new Blob(
+                [file.content || ""],
+                {type:"text/plain;charset=utf-8"}
+            );
+    }
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        file.name;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
+}
+
+
+function exportCurrentFile(){
+
+    if(!editorFileId){
+
+        return;
+    }
+
+
+    saveEditor();
+
+
+    const data = getData();
+
+    const file =
+        data.files.find(
+            f => f.id === editorFileId
+        );
+
+
+    if(file){
+
+        exportFile(file);
+    }
+}
+
+
+/* =========================
+   IMPORT
+========================= */
+
+function importFiles(){
+
+    fileInput.value = "";
+
+    fileInput.click();
+}
+
+
+fileInput.addEventListener(
+    "change",
+    async function(){
+
+        if(!this.files.length){
+
+            return;
+        }
+
+
+        const data = getData();
+
+
+        for(
+            const file of this.files
+        ){
+
+            try{
+
+                const content =
+                    await readBrowserFile(file);
+
+
+                const duplicate =
+                    data.files.some(
+                        f =>
+                            f.path === currentPath &&
+                            f.name === file.name
+                    );
+
+
+                if(duplicate){
+
+                    continue;
+                }
+
+
+                const now =
+                    Date.now();
+
+
+                data.files.push({
+
+                    id:makeId(),
+
+                    name:file.name,
+
+                    path:currentPath,
+
+                    content:content,
+
+                    size:file.size,
+
+                    created:now,
+
+                    updated:now
+                });
+
+            }catch(error){
+
+                console.error(
+                    "Import error:",
+                    error
+                );
+            }
+        }
+
+
+        saveData(data);
+
+        renderFiles();
+
+        this.value = "";
+    }
+);
+
+
+function readBrowserFile(file){
+
+    return new Promise(
+        (resolve,reject) => {
+
+            const reader =
+                new FileReader();
+
+
+            const binaryTypes = [
+
+                "image/",
+
+                "audio/",
+
+                "video/",
+
+                "application/pdf",
+
+                "application/zip",
+
+                "application/vnd.android.package-archive"
+            ];
+
+
+            const isBinary =
+                binaryTypes.some(
+                    type =>
+                        file.type.startsWith(type) ||
+                        file.type === type
+                );
+
+
+            reader.onload =
+                () => resolve(
+                    reader.result
+                );
+
+
+            reader.onerror =
+                () => reject(
+                    reader.error
+                );
+
+
+            if(isBinary){
+
+                reader.readAsDataURL(file);
+
+            }else{
+
+                reader.readAsText(file);
+            }
+        }
+    );
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+function toggleSearch(){
+
+    const bar =
+        document.getElementById(
+            "searchBar"
+        );
+
+
+    if(bar.style.display === "block"){
+
+        bar.style.display =
+            "none";
+
+        searchInput.value = "";
+
+        renderFiles();
+
+    }else{
+
+        bar.style.display =
+            "block";
+
+        setTimeout(
+            () => searchInput.focus(),
+            50
+        );
+    }
+}
+
+
+/* =========================
+   SORT
+========================= */
+
+function sortFiles(){
+
+    if(sortMode === "name"){
+
+        sortMode = "date";
+
+    }else if(sortMode === "date"){
+
+        sortMode = "size";
+
+    }else{
+
+        sortMode = "name";
+    }
+
+
+    renderFiles();
+}
+
+
+/* =========================
+   REFRESH
+========================= */
+
+function refreshFiles(){
+
+    renderFiles();
+}
+
+
+/* =========================
+   CLEAR CURRENT FOLDER
+========================= */
+
+function clearAllFiles(){
+
+    if(!currentUser){
+
+        return;
+    }
+
+
+    if(
+        !confirm(
+            "Delete all files and subfolders inside the current folder?"
+        )
+    ){
+
+        return;
+    }
+
+
+    const data = getData();
+
+    const prefix =
+        currentPath
+            ? currentPath + "/"
+            : "";
+
+
+    data.files =
+        data.files.filter(
+            file => {
+
+                if(
+                    file.path === currentPath
+                ){
+
+                    return false;
+                }
+
+                if(
+                    prefix &&
+                    file.path.startsWith(prefix)
+                ){
+
+                    return false;
+                }
+
+                return true;
+            }
+        );
+
+
+    data.folders =
+        data.folders.filter(
+            folder => {
+
+                if(
+                    folder.path === currentPath
+                ){
+
+                    return false;
+                }
+
+                if(
+                    prefix &&
+                    (
+                        folder.path === currentPath ||
+                        folder.path.startsWith(prefix)
+                    )
+                ){
+
+                    return false;
+                }
+
+                return true;
+            }
+        );
+
+
+    saveData(data);
+
+    closeOverlays();
+
+    renderFiles();
+}
+
+
+/* =========================
+   OVERLAYS
+========================= */
+
+function closeOverlays(){
+
+    document
+        .querySelectorAll(".overlay")
+        .forEach(
+            el =>
+                el.style.display = "none"
+        );
+
+    selectedItem = null;
+}
+
+
+function openAccount(){
+
+    closeOverlays();
+
+    if(!currentUser){
+
+        return;
+    }
+
+
+    document.getElementById(
+        "accountUsername"
+    ).textContent =
+        currentUser.username;
+
+
+    document.getElementById(
+        "accountId"
+    ).textContent =
+        currentUser.id;
+
+
+    document.getElementById(
+        "accountOverlay"
+    ).style.display =
+        "flex";
+}
+
+
+function openMore(){
+
+    closeOverlays();
+
+    document.getElementById(
+        "moreOverlay"
+    ).style.display =
+        "flex";
+}
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Escape"){
+
+            if(
+                previewScreen.style.display ===
+                "flex"
+            ){
+
+                closePreview();
+
+                return;
+            }
+
+
+            if(
+                editorScreen.style.display ===
+                "flex"
+            ){
+
+                closeEditor();
+
+                return;
+            }
+
+
+            closeOverlays();
+        }
+
+
+        if(
+            event.ctrlKey &&
+            event.key.toLowerCase() === "s"
+        ){
+
+            if(
+                editorScreen.style.display ===
+                "flex"
+            ){
+
+                event.preventDefault();
+
+                saveEditor();
+            }
+        }
+
+
+        if(
+            event.ctrlKey &&
+            event.key.toLowerCase() === "f"
+        ){
+
+            event.preventDefault();
+
+            toggleSearch();
+        }
+    }
+);
+
+
+/* =========================
+   AUTO SAVE
+========================= */
+
+editor.addEventListener(
+    "input",
+    function(){
+
+        if(!editorFileId){
+
+            return;
+        }
+
+
+        const data = getData();
+
+
+        const file =
+            data.files.find(
+                f => f.id === editorFileId
+            );
+
+
+        if(!file){
+
+            return;
+        }
+
+
+        file.content =
+            editor.value;
+
+        file.size =
+            new Blob([
+                file.content
+            ]).size;
+
+        file.updated =
+            Date.now();
+
+
+        saveData(data);
+    }
+);
+
+
+/* =========================
+   TOUCH LONG PRESS
+========================= */
+
+let pressTimer = null;
+
+
+fileList.addEventListener(
+    "touchstart",
+    function(event){
+
+        const item =
+            event.target.closest(
+                ".fileItem"
+            );
+
+        if(!item){
+
+            return;
+        }
+
+
+        pressTimer =
+            setTimeout(
+                () => {
+
+                    const menu =
+                        item.querySelector(
+                            ".fileMenu"
+                        );
+
+                    if(menu){
+
+                        menu.click();
+                    }
+
+                },
+                650
+            );
+    },
+    {
+        passive:true
+    }
+);
+
+
+fileList.addEventListener(
+    "touchend",
+    function(){
+
+        clearTimeout(
+            pressTimer
+        );
+    }
+);
+
+
+fileList.addEventListener(
+    "touchmove",
+    function(){
+
+        clearTimeout(
+            pressTimer
+        );
+    }
+);
+
+
+/* =========================
+   START
+========================= */
+
+showAuth("login");
+
+</script>
+</body>
+</html>
